@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import lombok.Getter;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class CommandNode implements Node{
@@ -18,14 +19,26 @@ public abstract class CommandNode implements Node{
             nodeName = name;
             }
             @Override
-            public void run(CommandSource source) {
+            public synchronized void run(CommandSource source) {
                 commandNode.run(source);
             }
         };
     }
 
-    public void then(CommandNode commandNode){
-        children.put(commandNode.nodeName, commandNode);
+    public CommandNode then(CommandNode commandNode){
+        if(!children.containsKey(commandNode.nodeName)) {
+            children.put(commandNode.nodeName, commandNode);
+        }else{
+            Map<String,CommandNode> map = children.get(commandNode.nodeName).children;
+            for(CommandNode commandNode1:commandNode.children.values()){
+                if(!map.containsKey(commandNode1.nodeName)){
+                    map.put(commandNode1.nodeName,commandNode1);
+                }else{
+                    map.get(commandNode1.nodeName).then(commandNode1);
+                }
+            }
+        }
+        return this;
     }
 
     public void remove(CommandNode commandNode){

@@ -11,7 +11,7 @@ import javax.persistence.Lob;
 @Data
 public class SQLDataPack {
     @Id
-    String uuid = StrUtil.uuid();
+    String UUID = StrUtil.uuid();
     String tags;
     @Lob
     String data;

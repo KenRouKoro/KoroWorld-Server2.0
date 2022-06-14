@@ -1,8 +1,9 @@
 package cn.korostudio.koroworldserver.command;
 
 import cn.hutool.json.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
-
+@Slf4j
 public class CommandAPI {
 
     protected static CommandNode root = CommandNode.creat("root",e->{});
@@ -10,10 +11,9 @@ public class CommandAPI {
     public static void register(CommandNode commandNode){
         root.then(commandNode);
     }
-    protected static void run(JSONObject dataPack, WebSocketSession session){
+    public static void run(JSONObject dataPack, WebSocketSession session){
         String commandStr = dataPack.getStr("command");
-        String []commands = (commandStr.trim()).split(" ");
-        commands[0] = commands[0].substring(1);
+        String []commands = commandStr.split(" ");
         CommandNode commandNode = root;
         CommandSource source = new CommandSource();
         source.setSource(dataPack);
@@ -27,6 +27,7 @@ public class CommandAPI {
             }
         }
         if(commandNode==root){
+            log.error("Why is Root?????");
             return;
         }
         source.setData(dataPack.getStr("data"));

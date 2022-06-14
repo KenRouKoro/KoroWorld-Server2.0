@@ -7,7 +7,6 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import jdk.internal.loader.ClassLoaders;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,18 +28,30 @@ public class ModLoader {
     static public void load(){
         log.info("Mod loading class being scanned.");
         JarClassLoader loader = ClassLoaderUtil.getJarClassLoader(new File(System.getProperty("user.dir")+"/mods"));
-        ClassScanner classScanner = new ClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));
-        classScanner.setClassLoader(loader);
-        modsClass = classScanner.scan(true);
+        log.info("Mods File: ");
+        for(File file:FileUtil.ls(System.getProperty("user.dir")+"/mods")){
+            try {
+                log.info(file.getCanonicalPath());
+            } catch (IOException ignored) {
+            }
+        }
+
+        OtherClassScanner otherScanner = new OtherClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));
+        otherScanner.setClassLoader(loader);
+        modsClass = otherScanner.scan(true);
         log.info("Scan Mod load class complete.");
     }
+
+
     static public void runInit(){
         log.info("Mod being initialized.");
+        log.info("————————————————————————————————————ModList————————————————————————————————————");
         for(Class<?>cla:modsClass){
             ModTemplate template = (ModTemplate) ReflectUtil.newInstanceIfPossible(cla);
             mods.put(template.getName(),template);
-            log.info(template.getName());
+            log.info("  "+template.getName());
         }
+        log.info("————————————————————————————————————ModList————————————————————————————————————");
         for (ModTemplate template: mods.values()){
             template.Init();
         }

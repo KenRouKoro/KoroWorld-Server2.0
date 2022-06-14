@@ -3,6 +3,7 @@ package cn.korostudio.koroworldserver.wsservice;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.korostudio.koroworldserver.data.DataPackProcess;
 import cn.korostudio.koroworldserver.data.sql.SQLDataPackRepository;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -31,22 +32,23 @@ public class WebSocketService extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         String serverName = (String)session.getAttributes().get("key");
         logger.info("Server "+serverName+" Connection.");
         Servers.put(serverName,session);
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String serverName = (String)session.getAttributes().get("key");
         logger.info("Server "+serverName+" Close Connection.");
         Servers.remove(serverName);
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         JSONObject dataJSON = JSONUtil.parseObj(message.getPayload());
         dataJSON.putOnce("http",false);
+        DataPackProcess.run(dataJSON,session);
     }
 }

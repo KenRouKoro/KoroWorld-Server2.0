@@ -6,7 +6,7 @@ import lombok.Data;
  **/
 @Data
 public class DataPack {
-    String uuid;
+    String UUID;
     String type;//command, or in Mod , These are the only ones that are handled on the server.
     String from;
     String target;// servername or ALL

@@ -20,23 +20,23 @@ public class ChatInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        logger.info("握手开始");
+        logger.info("The handshake begins......");
         // 获得请求参数
         Map<String, String> paramMap = HttpUtil.decodeParamMap(request.getURI().getQuery(), CharsetUtil.CHARSET_UTF_8);
         String sid =  paramMap.get("key");
         if (StrUtil.isNotBlank(sid)) {
             // 放入属性域
             attributes.put("key", Base62.decodeStr(sid));
-            logger.info("服务器：" + Base62.decodeStr(sid) + " 握手成功！");
+            logger.info("Server：" + Base62.decodeStr(sid) + " Successful handshake!");
             return true;
         }
-        logger.info("服务器连接已失效");
+        logger.info("The server connection is no longer available.");
         return false;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
-        logger.info("握手完成");
+        logger.info("Handshake complete.");
     }
 
 }
