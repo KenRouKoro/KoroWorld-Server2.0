@@ -7,6 +7,7 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import jdk.internal.loader.ClassLoaders;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,21 +25,28 @@ public class ModLoader {
     protected static Set<Class<?>>modsClass =null;
 
     protected static CopyOnWriteArrayList<String>classPath = new CopyOnWriteArrayList<>();
+    @Getter
+    protected static JarClassLoader loader;
 
     static public void load(){
         log.info("Mod loading class being scanned.");
-        JarClassLoader loader = ClassLoaderUtil.getJarClassLoader(new File(System.getProperty("user.dir")+"/mods"));
+        //loader = ClassLoaderUtil.getJarClassLoader(new File(System.getProperty("user.dir")+"/mods"));
         log.info("Mods File: ");
-        for(File file:FileUtil.ls(System.getProperty("user.dir")+"/mods")){
+        for(File file: FileUtil.ls(System.getProperty("user.dir")+"/mods")){
             try {
                 log.info(file.getCanonicalPath());
+                ReflectUtil.invoke(ClassLoaders.appClassLoader(), "appendClassPath", file.getCanonicalPath());
             } catch (IOException ignored) {
             }
         }
 
         OtherClassScanner otherScanner = new OtherClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));
-        otherScanner.setClassLoader(loader);
+        otherScanner.setClassLoader(ClassLoaders.appClassLoader());
         modsClass = otherScanner.scan(true);
+        //modsClass = ClassScanner.scanAllPackageBySuper("",ModTemplate.class);
+        //ClassScanner classScanner = new ClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));
+        //classScanner.setClassLoader(ClassLoaders.appClassLoader());
+        //modsClass = classScanner.scan(true);
         log.info("Scan Mod load class complete.");
     }
 

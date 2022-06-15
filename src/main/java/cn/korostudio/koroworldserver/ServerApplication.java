@@ -1,11 +1,15 @@
 package cn.korostudio.koroworldserver;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.korostudio.koroworldserver.mod.ModLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -14,14 +18,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import jdk.internal.loader.ClassLoaders;
 
 @SpringBootApplication
 @Slf4j
 public class ServerApplication {
 
-    public final static ArrayList<String> Packages = new ArrayList<>(List.of(new String[]{"cn.korostudio.koroworldserver"}));
+    public final static ArrayList<String> Packages = new ArrayList<>(List.of(new String[]{"cn.korostudio.koroworldserver","cn.korostudio.koroworld"}));
 
     public static void main(String[] args) {
+
+        //String modsFile = System.getProperty("user.dir")+"/mods";
+        //ReflectUtil.invoke(ClassLoaders.appClassLoader(), "appendClassPath", modsFile);
+
         ModLoader.load();
         ModLoader.runInit();
 
@@ -38,7 +47,7 @@ public class ServerApplication {
             log.error("启动出现致命错误！");
             System.exit(0);
         }
-
+        //Thread.currentThread().setContextClassLoader(ModLoader.getLoader());
         SpringApplication.run(ServerApplication.class, args);
     }
 

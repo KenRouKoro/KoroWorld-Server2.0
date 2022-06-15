@@ -7,10 +7,13 @@ import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Filter;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.*;
+import jdk.internal.loader.BuiltinClassLoader;
+import jdk.internal.loader.URLClassPath;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -54,7 +57,7 @@ public class OtherClassScanner {
     /**
      * 类加载器
      */
-    protected JarClassLoader classLoader;
+    protected ClassLoader classLoader;
     /**
      * 是否初始化类
      */
@@ -223,15 +226,22 @@ public class OtherClassScanner {
      * @since 5.7.5
      */
     public Set<Class<?>> scan(boolean forceScanJavaClassPaths) {
-        for (URL url : ((JarClassLoader) classLoader).getURLs()) {
-            switch (url.getProtocol()) {
-                case "file":
-                    scanFile(new File(URLUtil.decode(url.getFile(), this.charset.name())), null);
-                    break;
-                case "jar":
-                    scanJar(URLUtil.getJarFile(url));
-                    break;
+
+        try {
+            Field field = ReflectUtil.getField(BuiltinClassLoader.class,"ucp");
+            field.setAccessible(true);
+            for (URL url : ((URLClassPath)field.get(classLoader)).getURLs()){//((URLClassLoader) classLoader).getURLs()) {
+                switch (url.getProtocol()) {
+                    case "file":
+                        scanFile(new File(URLUtil.decode(url.getFile(), this.charset.name())), null);
+                        break;
+                    case "jar":
+                        scanJar(URLUtil.getJarFile(url));
+                        break;
+                }
             }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
 
         // classpath下未找到，则扫描其他jar包下的类
@@ -257,7 +267,7 @@ public class OtherClassScanner {
      * @param classLoader 类加载器
      * @since 4.6.9
      */
-    public void setClassLoader(JarClassLoader classLoader) {
+    public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 

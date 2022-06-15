@@ -9,6 +9,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -44,6 +45,9 @@ public class DataPackProcess {
             String target = dataPack.getStr("target");
             if(target.equals("ALL")){
                 for(String name: WebSocketService.getServers().keySet()){
+                    if(Objects.equals(name, dataPack.getStr("from"))){
+                        continue;
+                    }
                     try {
                         WebSocketService.getServers().get(name).sendMessage(new TextMessage(dataPack.toString()));
                     } catch (IOException ignored) {

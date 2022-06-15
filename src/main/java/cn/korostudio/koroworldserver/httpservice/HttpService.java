@@ -7,6 +7,7 @@ import cn.korostudio.koroworldserver.data.SQLDataPack;
 import cn.korostudio.koroworldserver.data.sql.SQLDataPackRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,14 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.Optional;
 @Slf4j
+@Component
 @RestController()
 @RequestMapping(value = "/data")
 public class HttpService {
     protected static SQLDataPackRepository sqlDataPackRepository;
 
     @Autowired
-    public SQLDataPackRepository getSqlDataPackRepository() {
-        return sqlDataPackRepository;
+    public void setSqlDataPackRepository(SQLDataPackRepository sqlDataPackRepository) {
+        HttpService.sqlDataPackRepository = sqlDataPackRepository;
     }
 
     @PostMapping("/process")
