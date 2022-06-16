@@ -1,7 +1,6 @@
 package cn.korostudio.koroworldserver.wsservice.config;
 
 import cn.korostudio.koroworldserver.wsservice.WebSocketService;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

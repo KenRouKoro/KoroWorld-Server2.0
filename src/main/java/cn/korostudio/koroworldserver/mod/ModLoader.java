@@ -1,13 +1,10 @@
 package cn.korostudio.koroworldserver.mod;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.FileNameUtil;
-import cn.hutool.core.lang.ClassScanner;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import jdk.internal.loader.ClassLoaders;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,18 +27,23 @@ public class ModLoader {
 
     static public void load(){
         log.info("Mod loading class being scanned.");
+
+        FileUtil.mkdir(System.getProperty("user.dir")+"/mods");
         //loader = ClassLoaderUtil.getJarClassLoader(new File(System.getProperty("user.dir")+"/mods"));
         log.info("Mods File: ");
         for(File file: FileUtil.ls(System.getProperty("user.dir")+"/mods")){
             try {
                 log.info(file.getCanonicalPath());
-                ReflectUtil.invoke(ClassLoaders.appClassLoader(), "appendClassPath", file.getCanonicalPath());
+                //ReflectUtil.invoke(ClassLoaders.appClassLoader(), "appendClassPath", file.getCanonicalPath());
             } catch (IOException ignored) {
             }
         }
 
         OtherClassScanner otherScanner = new OtherClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));
-        otherScanner.setClassLoader(ClassLoaders.appClassLoader());
+        //otherScanner.setClassLoader(ClassLoaders.appClassLoader());
+        loader = ClassLoaderUtil.getJarClassLoader(new File(System.getProperty("user.dir") + "/mods"));
+        otherScanner.setClassLoader(loader);
+        Thread.currentThread().setContextClassLoader(loader);
         modsClass = otherScanner.scan(true);
         //modsClass = ClassScanner.scanAllPackageBySuper("",ModTemplate.class);
         //ClassScanner classScanner = new ClassScanner(StrUtil.EMPTY,clazz -> ModTemplate.class.isAssignableFrom(clazz) && !ModTemplate.class.equals(clazz));

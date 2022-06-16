@@ -5,7 +5,6 @@ import cn.hutool.core.collection.EnumerationIter;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Filter;
-import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.*;
 import jdk.internal.loader.BuiltinClassLoader;
 import jdk.internal.loader.URLClassPath;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
@@ -227,10 +227,11 @@ public class OtherClassScanner {
      */
     public Set<Class<?>> scan(boolean forceScanJavaClassPaths) {
 
-        try {
-            Field field = ReflectUtil.getField(BuiltinClassLoader.class,"ucp");
-            field.setAccessible(true);
-            for (URL url : ((URLClassPath)field.get(classLoader)).getURLs()){//((URLClassLoader) classLoader).getURLs()) {
+        //try {
+            //Field field = ReflectUtil.getField(BuiltinClassLoader.class,"ucp");
+            //field.setAccessible(true);
+            for (URL url : //((URLClassPath)field.get(classLoader)).getURLs()){
+                ((URLClassLoader) classLoader).getURLs()) {
                 switch (url.getProtocol()) {
                     case "file":
                         scanFile(new File(URLUtil.decode(url.getFile(), this.charset.name())), null);
@@ -240,9 +241,9 @@ public class OtherClassScanner {
                         break;
                 }
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        //} catch (IllegalAccessException e) {
+        //    throw new RuntimeException(e);
+        //}
 
         // classpath下未找到，则扫描其他jar包下的类
         if (forceScanJavaClassPaths || CollUtil.isEmpty(this.classes)) {
